@@ -1,0 +1,36 @@
+--- a/net/minecraft/world/Containers.java
++++ b/net/minecraft/world/Containers.java
+@@ -20,7 +20,9 @@ public class Containers {
+ 
+     private static void dropContents(Level level, double x, double y, double z, Container inventory) {
+         for (int i = 0; i < inventory.getContainerSize(); i++) {
+-            dropItemStack(level, x, y, z, inventory.getItem(i));
++	    // ENAK PATCH START
++            dropItemStack(level, x, y, z, inventory.getItem(i), "contianer:" + inventory.getClass().getName());
++	    // ENAK PATCH END
+         }
+     }
+ 
+@@ -29,6 +31,12 @@ public class Containers {
+     }
+ 
+     public static void dropItemStack(Level level, double x, double y, double z, ItemStack stack) {
++    // ENAK PATCH START
++    	dropItemStack(level, x, y, z, stack, "");
++    }
++
++    public static void dropItemStack(Level level, double x, double y, double z, ItemStack stack, String tag) {
++    // ENAK PATCH END
+         double d = EntityType.ITEM.getWidth();
+         double d1 = 1.0 - d;
+         double d2 = d / 2.0;
+@@ -38,6 +46,9 @@ public class Containers {
+ 
+         while (!stack.isEmpty()) {
+             ItemEntity itemEntity = new ItemEntity(level, d3, d4, d5, stack.split(level.random.nextInt(21) + 10));
++	    // ENAK PATCH START
++	    if (!tag.isEmpty()) itemEntity.addTag(tag);
++	    // ENAK PATCH END
+             float f = 0.05F;
+             itemEntity.setDeltaMovement(
+                 level.random.triangle(0.0, 0.11485000171139836),
