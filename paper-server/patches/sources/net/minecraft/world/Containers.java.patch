@@ -6,7 +6,7 @@
          for (int i = 0; i < inventory.getContainerSize(); i++) {
 -            dropItemStack(level, x, y, z, inventory.getItem(i));
 +	    // ENAK PATCH START
-+            dropItemStack(level, x, y, z, inventory.getItem(i), "contianer:" + inventory.getClass().getName());
++            dropItemStack(level, x, y, z, inventory.getItem(i), "container:" + inventory.getClass().getName());
 +	    // ENAK PATCH END
          }
      }
