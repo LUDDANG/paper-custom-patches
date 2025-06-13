@@ -62,7 +62,7 @@
 +        if (event.isCancelled()) {
 +            return false;
 +        }
-+
++        itemEntity.getTags().add("cause:thrown-by-contianer");
 +        itemEntity.setItem(org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(event.getItem()));
 +        itemEntity.setDeltaMovement(org.bukkit.craftbukkit.util.CraftVector.toVec3(event.getVelocity()));
 +
