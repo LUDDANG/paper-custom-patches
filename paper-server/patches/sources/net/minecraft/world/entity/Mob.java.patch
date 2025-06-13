@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/Mob.java
 +++ b/net/minecraft/world/entity/Mob.java
-@@ -83,6 +_,14 @@
+@@ -83,6 +_,15 @@
  import net.minecraft.world.phys.AABB;
  import net.minecraft.world.ticks.ContainerSingleItem;
  
@@ -11,6 +11,7 @@
 +import org.bukkit.event.entity.EntityTransformEvent;
 +import org.bukkit.event.entity.EntityUnleashEvent;
 +// CraftBukkit end
++import java.util.function.Consumer;
 +
  public abstract class Mob extends LivingEntity implements EquipmentUser, Leashable, Targeting {
      private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
@@ -235,7 +236,7 @@
          ProfilerFiller profilerFiller = Profiler.get();
          profilerFiller.push("sensing");
          this.sensing.tick();
-@@ -793,14 +_,69 @@
+@@ -793,14 +_,90 @@
              public boolean stillValid(Player player) {
                  return player.getVehicle() == Mob.this || player.canInteractWithEntity(Mob.this, 4.0);
              }
@@ -296,6 +297,27 @@
 +    }
 +    // Paper end
 +
++    @Nullable
++    private ItemEntity spawnAtLocationCustom(ServerLevel level, ItemStack stack, float yOffset, @Nullable Consumer<? super ItemEntity> delayedAddConsumer) {
++        if (stack.isEmpty()) {
++            return null;
++        } else if (this instanceof LivingEntity && !this.forceDrops) {
++            this.drops.add(new DefaultDrop(stack, (itemStack) -> {
++                ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY() + (double)yOffset, this.getZ(), itemStack);
++                itemEntity.getTags().add("cause:mob_death_drop_custom_loot");
++                itemEntity.setDefaultPickUpDelay();
++                this.level().addFreshEntity(itemEntity);
++                if (delayedAddConsumer != null) {
++                    delayedAddConsumer.accept(itemEntity);
++                }
++
++            }));
++            return null;
++        } else {
++            return super.spawnAtLocation(level, stack, yOffset, delayedAddConsumer);
++        }
++    }
+
      @Override
      protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) {
          super.dropCustomDeathLoot(level, damageSource, recentlyHit);
@@ -308,7 +330,8 @@
 @@ -820,7 +_,13 @@
                      }
  
-                     this.spawnAtLocation(level, itemBySlot);
+-                    this.spawnAtLocation(level, itemBySlot);
++                    this.spawnAtLocationCustom(level, itemBySlot, 0.0F, (Consumer) null);
 +                    if (this.clearEquipmentSlots) { // Paper
                      this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
 +                    // Paper start
